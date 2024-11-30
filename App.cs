@@ -161,7 +161,7 @@ class Usage {
             login to https://adventofcode.com, then copy your session cookie, and export 
             it in your console like this
 
-             export SESSION=73a37e9a72a...
+             export AOC_COOKIE=73a37e9a72a...
 
             then run the app with
 

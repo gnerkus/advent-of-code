@@ -62,10 +62,10 @@ class Updater {
     }
 
     private string GetSession() {
-        if (!Environment.GetEnvironmentVariables().Contains("SESSION")) {
+        if (!Environment.GetEnvironmentVariables().Contains("AOC_COOKIE")) {
             throw new AocCommuncationError("Specify SESSION environment variable", null);
         }
-        return Environment.GetEnvironmentVariable("SESSION");
+        return Environment.GetEnvironmentVariable("AOC_COOKIE");
     }
     private IBrowsingContext GetContext() {
 
