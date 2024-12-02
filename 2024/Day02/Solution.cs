@@ -20,10 +20,10 @@ class Solution : Solver {
 
     public object PartTwo(string input) {
         var reportList = InputParser(input);
-        return reportList.Count(IsSafeWithTolerance);
+        // return reportList.Count(IsSafeWithTolerance);
 
         // correct answer
-        // return reportList.Count(item => Attenuate(item).Any(IsSafe));
+        return reportList.Count(item => Attenuate(item.ToArray()).Any(IsSafe));
     }
 
     private static List<List<int>> InputParser(string input) {
@@ -105,6 +105,9 @@ class Solution : Solver {
 
             fixedReport = true;
         }
+
+        if (adjacencyDiffs.Count(item => item == 0) > 1)
+            return false;
         
         // remove one 0
         var removeDuplicate = adjacencyDiffs.Remove(0);
@@ -112,7 +115,8 @@ class Solution : Solver {
         return !(fixedReport && removeDuplicate);
     }
 
-    private static bool IsSafe(List<int> report) {
+    private static bool IsSafe(IEnumerable<int> sample) {
+        var report = sample.ToList();
         if (!IsDiffSafe(report[1], report[0]))
             return false;
         
