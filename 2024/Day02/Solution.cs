@@ -17,7 +17,11 @@ class Solution : Solver {
     }
 
     public object PartTwo(string input) {
-        return 0;
+        var reportList = InputParser(input);
+        return reportList.Count(IsSafeWithTolerance);
+
+        // correct answer
+        // return reportList.Count(item => Attenuate(item).Any(IsSafe));
     }
 
     private static List<List<int>> InputParser(string input) {
@@ -27,6 +31,76 @@ class Solution : Solver {
 
         return rows.Select(row => row.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int
             .Parse).ToList()).ToList();
+    }
+
+    private static IEnumerable<List<int>> Attenuate(List<int> report) {
+        var result = new List<List<int>>();
+
+        for (int i = 0; i < report.Count + 1; i++) {
+            var before = report.Take(i - 1);
+            var after = report.Skip(i);
+            result.Add(before.Concat(after).ToList());
+        }
+
+        return result;
+    }
+
+    private static bool IsSafeWithTolerance(List<int> report) {
+        var adjacencyDiffs = new List<int>();
+        
+        for (int i = 1; i < report.Count; i++) {
+            adjacencyDiffs.Add(report[i] - report[i - 1]);
+        }
+        
+        // remove one 0
+        var fixedReport = adjacencyDiffs.Remove(0);
+        
+        // check if strictly increasing
+        var positiveCount = adjacencyDiffs.Count(item => item > 0);
+        if (positiveCount < adjacencyDiffs.Count && positiveCount != 0) {
+            if (fixedReport) {
+                return false;
+            }
+
+            adjacencyDiffs = adjacencyDiffs.Where(item => item > 0).ToList();
+            fixedReport = true;
+        }
+        
+        // check if strictly decreasing
+        var negativeCount = adjacencyDiffs.Count(item => item < 0);
+        if (negativeCount < adjacencyDiffs.Count && negativeCount != 0) {
+            if (fixedReport) {
+                return false;
+            }
+
+            adjacencyDiffs = adjacencyDiffs.Where(item => item < 0).ToList();
+            fixedReport = true;
+        }
+
+        // check if there are multiple diffs greater than 3
+        var absCount = adjacencyDiffs.Count(item => Math.Abs(item) > 3);
+        if (absCount > 1) {
+            return false;
+        }
+        
+        // check for the position of the diff greater than 3
+        var absIndex = adjacencyDiffs.FindIndex(item => Math.Abs(item) > 3);
+        if (absIndex > 0 && absIndex < adjacencyDiffs.Count - 1) {
+            if (fixedReport) {
+                return false;
+            }
+
+            var diff = adjacencyDiffs[absIndex] + adjacencyDiffs[absIndex - 1];
+            if (Math.Abs(diff) > 3) {
+                return false;
+            }
+        } else if (absIndex != -1) {
+            if (fixedReport) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool IsSafe(List<int> report) {
