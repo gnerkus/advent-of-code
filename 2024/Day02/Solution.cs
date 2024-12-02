@@ -32,18 +32,16 @@ class Solution : Solver {
         return rows.Select(row => row.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int
             .Parse).ToList()).ToList();
     }
-
-    private static IEnumerable<List<int>> Attenuate(List<int> report) {
-        var result = new List<List<int>>();
-
-        for (int i = 0; i < report.Count + 1; i++) {
-            var before = report.Take(i - 1);
-            var after = report.Skip(i);
-            result.Add(before.Concat(after).ToList());
-        }
-
-        return result;
-    }
+    
+    /**
+     * When a problem involves checking if the input list is still valid if one or more items are removed,
+     * try to generate multiple permutations of that input list
+     */
+    IEnumerable<int[]> Attenuate(int[] samples) =>
+        from i in Enumerable.Range(0, samples.Length+1)
+        let before = samples.Take(i - 1)
+        let after = samples.Skip(i)
+        select before.Concat(after).ToArray();
 
     private static bool IsSafeWithTolerance(List<int> report) {
         var adjacencyDiffs = new List<int>();
