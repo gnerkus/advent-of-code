@@ -1,3 +1,5 @@
+using System.Data;
+
 namespace AdventOfCode.Y2024.Day02;
 
 using System;
@@ -50,55 +52,64 @@ class Solution : Solver {
             adjacencyDiffs.Add(report[i] - report[i - 1]);
         }
         
-        // remove one 0
-        var fixedReport = adjacencyDiffs.Remove(0);
+        var fixedReport = false;
         
-        // check if strictly increasing
-        var positiveCount = adjacencyDiffs.Count(item => item > 0);
-        if (positiveCount < adjacencyDiffs.Count && positiveCount != 0) {
-            if (fixedReport) {
-                return false;
-            }
-
-            adjacencyDiffs = adjacencyDiffs.Where(item => item > 0).ToList();
-            fixedReport = true;
-        }
-        
-        // check if strictly decreasing
-        var negativeCount = adjacencyDiffs.Count(item => item < 0);
-        if (negativeCount < adjacencyDiffs.Count && negativeCount != 0) {
-            if (fixedReport) {
-                return false;
-            }
-
-            adjacencyDiffs = adjacencyDiffs.Where(item => item < 0).ToList();
-            fixedReport = true;
-        }
-
         // check if there are multiple diffs greater than 3
         var absCount = adjacencyDiffs.Count(item => Math.Abs(item) > 3);
         if (absCount > 1) {
             return false;
         }
         
-        // check for the position of the diff greater than 3
-        var absIndex = adjacencyDiffs.FindIndex(item => Math.Abs(item) > 3);
-        if (absIndex > 0 && absIndex < adjacencyDiffs.Count - 1) {
-            if (fixedReport) {
-                return false;
-            }
+        // check if strictly increasing or decreasing
+        var positiveCount = adjacencyDiffs.Count(item => item > 0);
+        if (positiveCount >= 1 && positiveCount < adjacencyDiffs.Count) {
+            if (positiveCount == 1) {
+                // decreasing, see if we can remove the positive number
+                var posIndex = adjacencyDiffs.FindIndex(item => item > 0);
+                if (posIndex != -1) {
+                    adjacencyDiffs = Merge(adjacencyDiffs, posIndex);
+                    // if there's still a positive diff
+                    if (adjacencyDiffs.FindIndex(item => item > 0) >= 0) {
+                        return false;
+                    }
+                    fixedReport = true;
+                }
+                
+            } else if (positiveCount == adjacencyDiffs.Count - 1) {
+                // increasing, see if we can remove the negative number
+                var negIndex = adjacencyDiffs.FindIndex(item => item < 0);
+                if (negIndex != -1) {
+                    adjacencyDiffs = Merge(adjacencyDiffs, negIndex);
+                    // if there's still a negative diff
+                    if (adjacencyDiffs.FindIndex(item => item < 0) >= 0) {
+                        return false;
+                    }
+                    fixedReport = true;
+                }
+                
 
-            var diff = adjacencyDiffs[absIndex] + adjacencyDiffs[absIndex - 1];
-            if (Math.Abs(diff) > 3) {
-                return false;
-            }
-        } else if (absIndex != -1) {
-            if (fixedReport) {
+            } else {
                 return false;
             }
         }
+        
+        // check for the position of the diff greater than 3
+        var absIndex = adjacencyDiffs.FindIndex(item => Math.Abs(item) > 3);
+        if (absIndex > 0 && absIndex < adjacencyDiffs.Count - 1) {
+            return false;
+        }
+        
+        if (absIndex != -1) {
+            if (fixedReport)
+                return false;
 
-        return true;
+            fixedReport = true;
+        }
+        
+        // remove one 0
+        var removeDuplicate = adjacencyDiffs.Remove(0);
+
+        return !(fixedReport && removeDuplicate);
     }
 
     private static bool IsSafe(List<int> report) {
@@ -126,5 +137,37 @@ class Solution : Solver {
             return false;
 
         return Math.Abs(current - prev) is <= 3 and >= 1;
+    }
+
+    private static List<int> Merge(List<int> source, int index) {
+        var count = source.Count;
+
+        if (index == count - 1) {
+            var left = source[index] + source[index - 1];
+            var right = source[index - 1];
+            source.RemoveAt(index);
+            var smaller = Math.Min(Math.Abs(left), Math.Abs(right));
+            var newValue = smaller == Math.Abs(left) && smaller != 0 ? left : right;
+            source[index - 1] = newValue;
+            return source;
+        }
+
+        if (index == 0) {
+            var left = source[1];
+            var right = source[0] + source[1];
+            source.RemoveAt(index);
+            var smaller = Math.Min(Math.Abs(left), Math.Abs(right));
+            var newValue = smaller == Math.Abs(left) && smaller != 0 ? left : right;
+            source[index] = newValue;
+            return source;
+        }
+        
+        var l = source[index] + source[index - 1];
+        var r = source[index] + source[index + 1];
+        source.RemoveAt(index);
+        var s = Math.Min(Math.Abs(l), Math.Abs(r));
+        var n = s == Math.Abs(l) && s != 0 ? l : r;
+        source[index] = n;
+        return source;
     }
 }
