@@ -6,3 +6,18 @@ While the [Red-Nosed Reindeer nuclear fusion/fission plant](/2015/day/19) appear
 They're quick to add that - since you're already here - they'd really appreciate your help analyzing some unusual data from the Red-Nosed reactor. You turn to check if The Historians are waiting for you, but they seem to have already divided into groups that are currently searching every corner of the facility. You offer to help with the unusual data.
 
 Read the [full puzzle](https://adventofcode.com/2024/day/2).
+
+## Notes
+### First problem
+Time: ~12ms
+
+### Second problem
+Time: ~8ms
+
+I tried to define a method for checking the validity of a report if any element in the report 
+is removed. The attempt was attempted using a collection of the diffs between the inputs. This 
+failed multiple times and I resorted to generating all possible reports should zero or one 
+element be removed.
+
+The `Attenuate` method generates all possible reports.
+
