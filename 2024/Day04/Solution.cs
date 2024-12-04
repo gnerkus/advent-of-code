@@ -19,7 +19,16 @@ class Solution : Solver {
     }
 
     public object PartTwo(string input) {
-        return 0;
+        var parsedInput = InputParser(input);
+
+        return parsedInput.charArray.Select((item, pos) => {
+            if (item != 'a') {
+                return 0;
+            }
+
+            var cardinals = GetCrossCardinals(parsedInput.charArray, pos, parsedInput.width);
+            return cardinals.Count(cardinal => cardinal.Equals("masmas"));
+        }).Sum();
     }
 
     private static (int width, char[] charArray) InputParser(string input) {
@@ -105,6 +114,60 @@ class Solution : Solver {
             southwest
         ];
     }
-    
-    
+
+    private static IEnumerable<string> GetCrossCardinals(char[] inputArray, int pos, int width) {
+        var eastCheck = (pos + 1) % width < 1; // can't go east
+        var westCheck = pos % width < 1;
+        var northCheck = pos / width < 1; // can't go north
+        var southCheck = (pos + (width * 1)) > (inputArray.Length - 1);
+        var northEastCheck = northCheck || eastCheck;
+        var southEastCheck = southCheck || eastCheck;
+        var northWestCheck = northCheck || westCheck;
+        var southWestCheck = southCheck || westCheck;
+
+        var invalid = northEastCheck || northWestCheck || southEastCheck || southWestCheck;
+        
+        var down = invalid ? "" : string.Join("", [
+            inputArray[pos - width - 1],
+            inputArray[pos],
+            inputArray[pos + width + 1],
+            inputArray[pos - width + 1],
+            inputArray[pos],
+            inputArray[pos + width - 1]
+        ]);
+        
+        var right = invalid ? "" : string.Join("", [
+            inputArray[pos - width - 1],
+            inputArray[pos],
+            inputArray[pos + width + 1],
+            inputArray[pos + width - 1],
+            inputArray[pos],
+            inputArray[pos - width + 1]
+        ]);
+        
+        var up = invalid ? "" : string.Join("", [
+            inputArray[pos + width - 1],
+            inputArray[pos],
+            inputArray[pos - width + 1],
+            inputArray[pos + width + 1],
+            inputArray[pos],
+            inputArray[pos - width - 1],
+        ]);
+        
+        var left = invalid ? "" : string.Join("", [
+            inputArray[pos - width + 1],
+            inputArray[pos],
+            inputArray[pos + width - 1],
+            inputArray[pos + width + 1],
+            inputArray[pos],
+            inputArray[pos - width - 1]
+        ]);
+        
+        return [
+            down,
+            right,
+            up,
+            left
+        ];
+    }
 }
